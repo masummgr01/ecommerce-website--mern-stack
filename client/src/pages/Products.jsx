@@ -342,15 +342,25 @@ export function RegisterPage() {
       window.location.reload()
     } catch (err) {
       console.error('Registration error:', err)
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        request: err.request,
+        config: { url: err.config?.url, baseURL: err.config?.baseURL }
+      })
+      
       if (err.response) {
         // Server responded with error
-        setError(err.response.data?.message || 'Registration failed')
+        const errorMsg = err.response.data?.message || `Registration failed (${err.response.status})`
+        setError(errorMsg)
       } else if (err.request) {
         // Request made but no response (network/CORS issue)
-        setError('Cannot connect to server. Please check if the backend is running and CORS is configured correctly.')
+        const apiUrl = API_BASE || 'backend server'
+        setError(`Cannot connect to ${apiUrl}. Check if backend is running and CORS is configured. Check browser console for details.`)
       } else {
         // Something else happened
-        setError(err.message || 'Registration failed')
+        setError(err.message || 'Registration failed. Please try again.')
       }
     } finally {
       setLoading(false)
