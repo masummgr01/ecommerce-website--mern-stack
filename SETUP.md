@@ -82,3 +82,4 @@ npm run dev
 2. **MongoDB connection failed**: Server will exit if it can't connect to MongoDB.
 3. **CORS errors**: Make sure `CLIENT_URL` matches your frontend URL.
 
+

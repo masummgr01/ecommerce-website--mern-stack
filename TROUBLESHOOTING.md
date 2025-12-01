@@ -182,3 +182,4 @@ curl -X POST https://your-backend.onrender.com/api/auth/register \
 
 If these work but the frontend doesn't, it's likely a CORS or environment variable issue.
 
+
