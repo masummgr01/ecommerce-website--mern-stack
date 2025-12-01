@@ -62,6 +62,34 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'HamroShop API is running' });
 });
 
+// Catch-all route for undefined API endpoints (for debugging)
+app.use('/api/*', (req, res) => {
+  console.warn(`404 - API route not found: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({ 
+    error: 'API endpoint not found',
+    method: req.method,
+    path: req.originalUrl,
+    availableRoutes: [
+      'GET /api/health',
+      'POST /api/auth/register',
+      'POST /api/auth/login',
+      'GET /api/auth/me',
+      'GET /api/products',
+      'GET /api/products/:id',
+      'POST /api/products (admin)',
+      'PUT /api/products/:id (admin)',
+      'DELETE /api/products/:id (admin)',
+      'POST /api/orders',
+      'GET /api/orders',
+      'GET /api/orders/:id',
+      'POST /api/payments/esewa/initiate',
+      'POST /api/payments/esewa/test/complete',
+      'POST /api/payments/esewa/success',
+      'POST /api/payments/esewa/failure'
+    ]
+  });
+});
+
 // Mongo connection
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/hamroshop';
 
