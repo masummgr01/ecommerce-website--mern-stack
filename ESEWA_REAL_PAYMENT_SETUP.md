@@ -26,9 +26,8 @@ ESEWA_ENV=uat
 # Product Code for UAT/Testing (usually EPAYTEST)
 ESEWA_PRODUCT_CODE=EPAYTEST
 
-# Secret Key - Use the token or get from eSewa merchant dashboard
-# For UAT, this might be provided by eSewa or use: 123456
-ESEWA_SECRET_KEY=123456
+# Secret Key - From eSewa documentation for Epay-v2
+ESEWA_SECRET_KEY=8gBm/:&EnhH.1/q
 
 # eSewa UAT URLs
 ESEWA_FORM_URL_UAT=https://rc-epay.esewa.com.np/api/epay/main/v2/form

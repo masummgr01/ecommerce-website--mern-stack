@@ -94,7 +94,7 @@ For real eSewa payment with test credentials:
 ESEWA_TEST_MODE=false
 ESEWA_ENV=uat
 ESEWA_PRODUCT_CODE=EPAYTEST
-ESEWA_SECRET_KEY=123456
+ESEWA_SECRET_KEY=8gBm/:&EnhH.1/q
 ESEWA_FORM_URL_UAT=https://rc-epay.esewa.com.np/api/epay/main/v2/form
 ESEWA_FORM_URL_PROD=https://epay.esewa.com.np/api/epay/main/v2/form
 ESEWA_STATUS_URL_UAT=https://rc-epay.esewa.com.np/api/epay/transaction/status/
