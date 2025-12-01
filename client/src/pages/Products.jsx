@@ -49,15 +49,6 @@ export function Products() {
                   src={product.images[0]}
                   alt={product.name}
                   style={{ width: '100%', height: '200px', objectFit: 'cover' }}
-                  onError={(e) => {
-                    console.warn('Failed to load product image:', product.images[0])
-                    e.target.style.display = 'none'
-                    e.target.parentElement.style.backgroundColor = '#f3f4f6'
-                    e.target.parentElement.style.display = 'flex'
-                    e.target.parentElement.style.alignItems = 'center'
-                    e.target.parentElement.style.justifyContent = 'center'
-                    e.target.parentElement.innerHTML = '<span style="color: #9ca3af;">No Image</span>'
-                  }}
                 />
               )}
               <div style={{ padding: '1rem' }}>
@@ -143,12 +134,6 @@ export function ProductDetail() {
               src={product.images[0]}
               alt={product.name}
               style={{ width: '100%', borderRadius: '8px' }}
-              onError={(e) => {
-                console.warn('Failed to load product image:', product.images[0])
-                e.target.style.display = 'none'
-                const parent = e.target.parentElement
-                parent.innerHTML = '<div style="width: 100%; height: 400px; backgroundColor: #f3f4f6; borderRadius: 8px; display: flex; alignItems: center; justifyContent: center;"><span style="color: #9ca3af;">No Image Available</span></div>'
-              }}
             />
           ) : (
             <div style={{ width: '100%', height: '400px', backgroundColor: '#f3f4f6', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -215,36 +200,12 @@ export function CartPage() {
               borderRadius: '8px',
             }}
           >
-            {item.product.images && item.product.images.length > 0 ? (
+            {item.product.images && item.product.images.length > 0 && (
               <img
                 src={item.product.images[0]}
                 alt={item.product.name}
                 style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }}
-                onError={(e) => {
-                  console.warn('Failed to load cart item image:', item.product.images[0])
-                  e.target.style.display = 'none'
-                  const parent = e.target.parentElement
-                  if (!parent.querySelector('.image-placeholder')) {
-                    const placeholder = document.createElement('div')
-                    placeholder.className = 'image-placeholder'
-                    placeholder.style.width = '100px'
-                    placeholder.style.height = '100px'
-                    placeholder.style.backgroundColor = '#f3f4f6'
-                    placeholder.style.borderRadius = '4px'
-                    placeholder.style.display = 'flex'
-                    placeholder.style.alignItems = 'center'
-                    placeholder.style.justifyContent = 'center'
-                    placeholder.style.fontSize = '0.75rem'
-                    placeholder.style.color = '#9ca3af'
-                    placeholder.textContent = 'No Image'
-                    parent.insertBefore(placeholder, e.target)
-                  }
-                }}
               />
-            ) : (
-              <div style={{ width: '100px', height: '100px', backgroundColor: '#f3f4f6', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#9ca3af' }}>
-                No Image
-              </div>
             )}
             <div style={{ flex: 1 }}>
               <h3 style={{ margin: '0 0 0.5rem 0' }}>{item.product.name}</h3>
