@@ -91,15 +91,36 @@ router.put('/:id', auth(true), requireAdmin, async (req, res) => {
 router.delete('/:id', auth(true), requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findByIdAndUpdate(id, { isActive: false }, { new: true });
+    
+    // Validate ObjectId format
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'Invalid product ID format' });
+    }
+    
+    const product = await Product.findByIdAndUpdate(
+      id, 
+      { isActive: false }, 
+      { new: true, runValidators: true }
+    );
+    
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    res.json({ message: 'Product deactivated', product });
+    res.json({ 
+      message: 'Product deactivated successfully', 
+      product: {
+        _id: product._id,
+        name: product.name,
+        isActive: product.isActive
+      }
+    });
   } catch (err) {
-    console.error('Error deleting product', err);
-    res.status(500).json({ message: 'Failed to delete product' });
+    console.error('Error deleting product:', err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ message: 'Invalid product ID' });
+    }
+    res.status(500).json({ message: 'Failed to delete product. Please try again.' });
   }
 });
 

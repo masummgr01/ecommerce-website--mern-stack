@@ -110,15 +110,22 @@ export default function AdminProducts() {
   }
 
   async function handleDelete(id) {
-    if (!window.confirm('Delete this product permanently?')) return
+    if (!window.confirm('Are you sure you want to deactivate this product? It will no longer be visible to customers.')) return
     try {
-      await axios.delete(`${API_BASE}/api/products/${id}`, {
+      const res = await axios.delete(`${API_BASE}/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
+      console.log('Product deleted:', res.data)
       await fetchProducts()
+      setError('') // Clear any previous errors
     } catch (err) {
-      console.error(err)
-      setError(err.response?.data?.message || 'Failed to delete product')
+      console.error('Delete error:', err)
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      setError(err.response?.data?.message || 'Failed to delete product. Please try again.')
     }
   }
 

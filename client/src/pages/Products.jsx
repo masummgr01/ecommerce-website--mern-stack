@@ -460,24 +460,52 @@ export function CheckoutPage() {
         window.location.href = paymentRes.data.paymentUrl
       } else {
         // Real eSewa - submit form
-        const form = document.createElement('form')
-        form.method = 'POST'
-        form.action = paymentRes.data.paymentUrl
+        if (!paymentRes.data.paymentUrl || !paymentRes.data.formData) {
+          throw new Error('Invalid payment response from server')
+        }
+
+        const paymentForm = document.createElement('form')
+        paymentForm.method = 'POST'
+        paymentForm.action = paymentRes.data.paymentUrl
+        paymentForm.style.display = 'none'
 
         Object.entries(paymentRes.data.formData).forEach(([key, value]) => {
           const input = document.createElement('input')
           input.type = 'hidden'
           input.name = key
-          input.value = value
-          form.appendChild(input)
+          input.value = String(value)
+          paymentForm.appendChild(input)
         })
 
-        document.body.appendChild(form)
-        form.submit()
+        document.body.appendChild(paymentForm)
+        
+        // Submit form after a brief delay to ensure it's in the DOM
+        setTimeout(() => {
+          paymentForm.submit()
+        }, 100)
       }
     } catch (err) {
-      console.error('Checkout error', err)
-      setError(err.response?.data?.message || 'Checkout failed. Please try again.')
+      console.error('Checkout error:', err)
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        request: err.request
+      })
+      
+      let errorMessage = 'Checkout failed. Please try again.'
+      
+      if (err.response) {
+        // Server responded with error
+        errorMessage = err.response.data?.message || `Checkout failed (${err.response.status})`
+      } else if (err.request) {
+        // Request made but no response
+        errorMessage = 'Cannot connect to payment server. Please check your connection and try again.'
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      setError(errorMessage)
       setLoading(false)
     }
   }

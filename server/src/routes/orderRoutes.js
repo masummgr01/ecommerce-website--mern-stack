@@ -21,11 +21,14 @@ router.post('/', auth(false), async (req, res) => {
       return res.status(400).json({ message: 'Valid total amount is required' });
     }
 
-    // Verify products exist and check stock
+    // Verify products exist, are active, and check stock
     for (const item of items) {
       const product = await Product.findById(item.product);
       if (!product) {
         return res.status(400).json({ message: `Product ${item.product} not found` });
+      }
+      if (!product.isActive) {
+        return res.status(400).json({ message: `Product "${product.name}" is no longer available` });
       }
       if (product.stockQty !== undefined && product.stockQty < item.quantity) {
         return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
@@ -115,3 +118,4 @@ router.put('/:id/status', auth(true), async (req, res) => {
 });
 
 module.exports = router;
+

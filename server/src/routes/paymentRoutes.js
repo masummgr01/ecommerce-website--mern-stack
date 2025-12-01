@@ -32,13 +32,31 @@ router.post('/esewa/initiate', async (req, res) => {
       return res.status(400).json({ message: 'Order ID and amount are required' });
     }
 
-    const order = await Order.findById(orderId);
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ message: 'Invalid amount' });
+    }
+
+    // Validate ObjectId format
+    if (!orderId.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: 'Invalid order ID format' });
+    }
+
+    const order = await Order.findById(orderId).populate('items.product');
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
 
     if (order.paymentStatus === 'paid') {
       return res.status(400).json({ message: 'Order already paid' });
+    }
+
+    // Verify order items are still valid
+    for (const item of order.items) {
+      if (!item.product || !item.product.isActive) {
+        return res.status(400).json({ 
+          message: `Product "${item.product?.name || 'Unknown'}" in order is no longer available` 
+        });
+      }
     }
 
     // Generate transaction UUID
@@ -77,8 +95,10 @@ router.post('/esewa/initiate', async (req, res) => {
       ? process.env.ESEWA_FORM_URL_PROD 
       : process.env.ESEWA_FORM_URL_UAT;
     
-    const successUrl = process.env.ESEWA_SUCCESS_URL || 'http://localhost:5000/api/payments/esewa/success';
-    const failureUrl = process.env.ESEWA_FAILURE_URL || 'http://localhost:5000/api/payments/esewa/failure';
+    // Use backend URL for success/failure callbacks (eSewa will POST to these)
+    const backendUrl = process.env.BACKEND_URL || process.env.CLIENT_URL?.replace(/\/$/, '') || 'http://localhost:5000';
+    const successUrl = process.env.ESEWA_SUCCESS_URL || `${backendUrl}/api/payments/esewa/success`;
+    const failureUrl = process.env.ESEWA_FAILURE_URL || `${backendUrl}/api/payments/esewa/failure`;
 
     // Prepare payment data
     const totalAmount = amount.toString();
@@ -259,3 +279,4 @@ router.post('/esewa/failure', async (req, res) => {
 });
 
 module.exports = router;
+
