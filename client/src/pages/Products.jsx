@@ -455,19 +455,34 @@ export function CheckoutPage() {
         amount: getCartTotal(),
       })
 
+      console.log('Payment response:', paymentRes.data)
+
       if (paymentRes.data.testMode) {
         // Test mode - redirect to test payment page
+        if (!paymentRes.data.paymentUrl) {
+          throw new Error('Test payment URL not provided by server')
+        }
         window.location.href = paymentRes.data.paymentUrl
       } else {
         // Real eSewa - submit form
-        if (!paymentRes.data.paymentUrl || !paymentRes.data.formData) {
-          throw new Error('Invalid payment response from server')
+        if (!paymentRes.data.paymentUrl) {
+          console.error('Payment URL missing:', paymentRes.data)
+          throw new Error('Payment gateway URL not configured. Please contact administrator.')
         }
+        
+        if (!paymentRes.data.formData) {
+          console.error('Form data missing:', paymentRes.data)
+          throw new Error('Payment form data not provided by server')
+        }
+
+        console.log('Submitting payment form to:', paymentRes.data.paymentUrl)
+        console.log('Form data:', paymentRes.data.formData)
 
         const paymentForm = document.createElement('form')
         paymentForm.method = 'POST'
         paymentForm.action = paymentRes.data.paymentUrl
         paymentForm.style.display = 'none'
+        paymentForm.target = '_self' // Submit in same window
 
         Object.entries(paymentRes.data.formData).forEach(([key, value]) => {
           const input = document.createElement('input')
@@ -481,7 +496,12 @@ export function CheckoutPage() {
         
         // Submit form after a brief delay to ensure it's in the DOM
         setTimeout(() => {
-          paymentForm.submit()
+          try {
+            paymentForm.submit()
+          } catch (submitErr) {
+            console.error('Form submission error:', submitErr)
+            throw new Error('Failed to submit payment form. Please try again.')
+          }
         }, 100)
       }
     } catch (err) {

@@ -95,6 +95,15 @@ router.post('/esewa/initiate', async (req, res) => {
       ? process.env.ESEWA_FORM_URL_PROD 
       : process.env.ESEWA_FORM_URL_UAT;
     
+    // Validate form URL is configured
+    if (!formUrl) {
+      console.error('eSewa form URL not configured. ESEWA_FORM_URL_UAT or ESEWA_FORM_URL_PROD must be set.');
+      return res.status(500).json({ 
+        message: 'Payment gateway not configured. Please contact administrator.',
+        error: 'ESEWA_FORM_URL not set'
+      });
+    }
+    
     // Use backend URL for success/failure callbacks (eSewa will POST to these)
     const backendUrl = process.env.BACKEND_URL || process.env.CLIENT_URL?.replace(/\/$/, '') || 'http://localhost:5000';
     const successUrl = process.env.ESEWA_SUCCESS_URL || `${backendUrl}/api/payments/esewa/success`;
@@ -126,6 +135,22 @@ router.post('/esewa/initiate', async (req, res) => {
       transaction_uuid: transactionUUID,
       product_code: productCode,
       signature: signature.substring(0, 20) + '...', // Log partial signature for debugging
+    });
+
+    // Validate all required fields
+    if (!formUrl || !paymentData.signature) {
+      console.error('Payment configuration error:', { formUrl, hasSignature: !!paymentData.signature });
+      return res.status(500).json({ 
+        message: 'Payment gateway configuration error. Please contact administrator.',
+        error: 'Missing payment configuration'
+      });
+    }
+
+    console.log('eSewa Payment initiated:', {
+      orderId,
+      amount: totalAmount,
+      transactionUUID,
+      formUrl: formUrl.substring(0, 50) + '...',
     });
 
     // Return payment URL and form data
