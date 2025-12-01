@@ -86,21 +86,28 @@ ESEWA_FAILURE_URL=https://your-backend.onrender.com/api/payments/esewa/failure
 
 ---
 
-## Recommended Setup for Now
+## Recommended Setup for Real eSewa Payment (UAT)
 
-Since you're testing, use **Test Mode**:
+For real eSewa payment with test credentials:
 
 ```env
-ESEWA_TEST_MODE=true
+ESEWA_TEST_MODE=false
 ESEWA_ENV=uat
 ESEWA_PRODUCT_CODE=EPAYTEST
-ESEWA_SECRET_KEY=test-key-12345
+ESEWA_SECRET_KEY=123456
 ESEWA_FORM_URL_UAT=https://rc-epay.esewa.com.np/api/epay/main/v2/form
 ESEWA_FORM_URL_PROD=https://epay.esewa.com.np/api/epay/main/v2/form
+ESEWA_STATUS_URL_UAT=https://rc-epay.esewa.com.np/api/epay/transaction/status/
+ESEWA_STATUS_URL_PROD=https://epay.esewa.com.np/api/epay/transaction/status/
 BACKEND_URL=https://your-backend.onrender.com
 ESEWA_SUCCESS_URL=https://your-backend.onrender.com/api/payments/esewa/success
 ESEWA_FAILURE_URL=https://your-backend.onrender.com/api/payments/esewa/failure
 ```
+
+**Test User Credentials (for logging into eSewa):**
+- eSewa ID: `9806800001` (or 2, 3, 4, 5)
+- Password: `Nepal@123`
+- MPIN: `1122`
 
 **Replace `your-backend.onrender.com` with your actual Render backend URL!**
 
