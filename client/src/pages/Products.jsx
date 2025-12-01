@@ -275,7 +275,14 @@ export function LoginPage() {
       navigate('/')
       window.location.reload()
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed')
+      console.error('Login error:', err)
+      if (err.response) {
+        setError(err.response.data?.message || 'Login failed')
+      } else if (err.request) {
+        setError('Cannot connect to server. Please check if the backend is running and CORS is configured correctly.')
+      } else {
+        setError(err.message || 'Login failed')
+      }
     } finally {
       setLoading(false)
     }
@@ -334,7 +341,17 @@ export function RegisterPage() {
       navigate('/')
       window.location.reload()
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed')
+      console.error('Registration error:', err)
+      if (err.response) {
+        // Server responded with error
+        setError(err.response.data?.message || 'Registration failed')
+      } else if (err.request) {
+        // Request made but no response (network/CORS issue)
+        setError('Cannot connect to server. Please check if the backend is running and CORS is configured correctly.')
+      } else {
+        // Something else happened
+        setError(err.message || 'Registration failed')
+      }
     } finally {
       setLoading(false)
     }
