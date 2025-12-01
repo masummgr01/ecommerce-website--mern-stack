@@ -9,18 +9,30 @@ const TEST_MODE = process.env.ESEWA_TEST_MODE === 'true';
 
 // Generate eSewa signature
 // eSewa requires signature to be generated from specific fields in exact order
+// Format: total_amount=<amount>,transaction_uuid=<uuid>,product_code=<code>
 function generateEsewaSignature(totalAmount, transactionUuid, productCode) {
-  // Concatenate fields in exact order: total_amount,transaction_uuid,product_code
-  const message = `total_amount=${totalAmount},transaction_uuid=${transactionUuid},product_code=${productCode}`;
-  
   const secretKey = process.env.ESEWA_SECRET_KEY;
   if (!secretKey || secretKey === 'replace_with_esewa_secret') {
     throw new Error('ESEWA_SECRET_KEY is not configured');
   }
   
+  // eSewa signature format: total_amount=<value>,transaction_uuid=<value>,product_code=<value>
+  // All values must be strings
+  const message = `total_amount=${String(totalAmount)},transaction_uuid=${String(transactionUuid)},product_code=${String(productCode)}`;
+  
+  console.log('Signature generation:', {
+    message,
+    secretKeyLength: secretKey.length,
+    secretKeyPreview: secretKey.substring(0, 5) + '...'
+  });
+  
   const hmac = crypto.createHmac('sha256', secretKey);
   hmac.update(message);
-  return hmac.digest('base64');
+  const signature = hmac.digest('base64');
+  
+  console.log('Generated signature:', signature.substring(0, 20) + '...');
+  
+  return signature;
 }
 
 // POST /api/payments/esewa/initiate - initiate eSewa payment
@@ -110,7 +122,8 @@ router.post('/esewa/initiate', async (req, res) => {
     const failureUrl = process.env.ESEWA_FAILURE_URL || `${backendUrl}/api/payments/esewa/failure`;
 
     // Prepare payment data
-    const totalAmount = amount.toString();
+    // Important: All amounts must be strings for eSewa
+    const totalAmount = String(amount);
     
     const paymentData = {
       amount: totalAmount,
@@ -126,9 +139,19 @@ router.post('/esewa/initiate', async (req, res) => {
     };
 
     // Generate signature using only the signed fields in exact order
-    // Signature must be: HMAC-SHA256 of "total_amount=X,transaction_uuid=Y,product_code=Z"
+    // Signature format: HMAC-SHA256 of "total_amount=<amount>,transaction_uuid=<uuid>,product_code=<code>"
+    // All values in the message must be strings
     const signature = generateEsewaSignature(totalAmount, transactionUUID, productCode);
     paymentData.signature = signature;
+    
+    // Log payment data for debugging (without full signature)
+    console.log('eSewa Payment Request:', {
+      total_amount: totalAmount,
+      transaction_uuid: transactionUUID,
+      product_code: productCode,
+      signature_preview: signature.substring(0, 20) + '...',
+      formUrl: formUrl.substring(0, 50) + '...'
+    });
     
     console.log('eSewa Payment Data:', {
       total_amount: totalAmount,
