@@ -11,6 +11,11 @@ function auth(required = true) {
     }
 
     try {
+      if (!process.env.JWT_SECRET) {
+        console.error('JWT_SECRET is not configured');
+        if (!required) return next();
+        return res.status(500).json({ message: 'Server configuration error' });
+      }
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = { id: decoded.id, role: decoded.role };
       next();
